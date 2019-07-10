@@ -13,7 +13,13 @@ namespace Framework
     public static class SceneManager
 	{
 		private static readonly List<SceneEnum> SceneStack = new List<SceneEnum>();
+		private static readonly SceneData Data = new SceneData();
 
+		public class SceneData {
+			public readonly Dictionary<string, string> dictionary = new Dictionary<string, string>();
+			public const string LevelKey = "level-key";
+		}
+		
 		/// <summary>
 		/// If the scene is not the last on the stack, push the scene on the stack and load it.
 		/// If the scene is the last on the stack, reload it.
@@ -25,6 +31,11 @@ namespace Framework
 			}
 			LoadScene(scene);
         }
+
+		public static void GoTo(SceneEnum scene, KeyValuePair<string, string> tuple) {
+			AddData(tuple.Key, tuple.Value);
+			GoTo(scene);
+		}
 
 		/// <summary>
 		/// Replace the last scene of the stack by the new one.
@@ -39,6 +50,11 @@ namespace Framework
 			LoadScene(scene);
 		}
 
+		public static void ReplaceBy(SceneEnum scene, KeyValuePair<string, string> tuple) {
+			AddData(tuple.Key, tuple.Value);
+			ReplaceBy(scene);
+		}
+
 		/// <summary>
 		/// Remove the last scene of the stack and load the new last scene.
 		/// </summary>
@@ -48,7 +64,8 @@ namespace Framework
 				case 0:
 				case 1:
 					sceneToLoad = SceneEnum.MainMenuScene;
-					SceneStack[0] = sceneToLoad;
+					SceneStack.Clear();
+					SceneStack.Add(sceneToLoad);
 					break;
 				default:
 					SceneStack.RemoveAt(SceneStack.Count - 1);
@@ -60,6 +77,21 @@ namespace Framework
 
 		private static void LoadScene(SceneEnum scene) {
 			UnityEngine.SceneManagement.SceneManager.LoadScene((int)scene);
+		}
+
+		public static string GetData(string key) {
+			if (Data.dictionary.ContainsKey(key)) {
+				return Data.dictionary[key];
+			}
+
+			return "";
+		}
+
+		public static void AddData(string key, string value) {
+			if (Data.dictionary.ContainsKey(key)) {
+				Data.dictionary.Remove(key);
+			}
+			Data.dictionary.Add(key, value);
 		}
     }
 }
